@@ -37,6 +37,10 @@ public class TranslateServiceImpl implements TranslateService {
 
     @Override
     public TranslateResultDto translate(TranslateRequestDto translateRequestDto) {
+        if (translateRequestDto.getInput() == null) {
+            translateRequestDto.setInput("");
+        }
+
         TranslateRequest translateRequest = new TranslateRequest(null, translateRequestDto.getIp(),
                 translateRequestDto.getInput(), null);
 
@@ -72,7 +76,7 @@ public class TranslateServiceImpl implements TranslateService {
                 prevOutput = "";
             }
 
-            translateResultDto.setOutput(prevOutput + "Язык перевода не поддерживается");
+            translateResultDto.setOutput(prevOutput + " Язык перевода не поддерживается");
         } else {
             translateResult.setOutputLanguageId(outputLanguage.getId());
         }
@@ -118,17 +122,19 @@ public class TranslateServiceImpl implements TranslateService {
     }
 
     private String translateConcurrent(String input, String inputLanguage, String outputLanguage) {
-        StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder("");
         String[] inputByWords = input.split(" ");
 
         List<Future<ResponseEntity<Map>>> outputFutures = new ArrayList<>();
 
         for (String word : inputByWords) {
-            outputFutures.add(CompletableFuture.supplyAsync(
-                    () -> restTemplate.getForEntity(externalTranslatorUrl, Map.class,
-                            inputLanguage, outputLanguage, word),
-                    executorService
-            ));
+            if (!word.isEmpty()) {
+                outputFutures.add(CompletableFuture.supplyAsync(
+                        () -> restTemplate.getForEntity(externalTranslatorUrl, Map.class,
+                                inputLanguage, outputLanguage, word),
+                        executorService
+                ));
+            }
         }
 
         for (Future<ResponseEntity<Map>> future : outputFutures) {
@@ -138,6 +144,10 @@ public class TranslateServiceImpl implements TranslateService {
                 executorService.shutdownNow();
                 return null;
             }
+        }
+
+        if (!stringBuilder.isEmpty()) {
+            stringBuilder.deleteCharAt(stringBuilder.length() - 1);
         }
 
         return stringBuilder.toString();

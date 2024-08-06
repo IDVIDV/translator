@@ -1,6 +1,7 @@
 package ru.example.translator.repository.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.example.translator.entity.Language;
@@ -19,11 +20,19 @@ public class LanguageRepositoryImpl implements LanguageRepository {
 
     @Override
     public Language findById(Integer id) {
-        return jdbcTemplate.queryForObject(FIND_BY_ID_QUERY, languageMapper, id);
+        try {
+            return jdbcTemplate.queryForObject(FIND_BY_ID_QUERY, languageMapper, id);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     @Override
     public Language findByName(String name) {
-        return jdbcTemplate.queryForObject(FIND_BY_NAME_QUERY, languageMapper, name);
+        try {
+            return jdbcTemplate.queryForObject(FIND_BY_NAME_QUERY, languageMapper, name);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 }

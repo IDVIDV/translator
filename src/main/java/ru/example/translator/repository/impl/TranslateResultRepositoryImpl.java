@@ -1,6 +1,7 @@
 package ru.example.translator.repository.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -25,7 +26,11 @@ public class TranslateResultRepositoryImpl implements TranslateResultRepository 
 
     @Override
     public TranslateResult findById(Integer id) {
-        return jdbcTemplate.queryForObject(FIND_BY_ID_QUERY, translateResultMapper, id);
+        try {
+            return jdbcTemplate.queryForObject(FIND_BY_ID_QUERY, translateResultMapper, id);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     @Override

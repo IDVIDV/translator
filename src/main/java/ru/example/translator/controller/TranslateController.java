@@ -1,5 +1,7 @@
 package ru.example.translator.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,11 +13,13 @@ import ru.example.translator.dto.TranslateRequestDto;
 import ru.example.translator.dto.TranslateResultDto;
 import ru.example.translator.service.TranslateService;
 
+@Tag(name = "Translate Controller")
 @RestController
 @RequiredArgsConstructor
 public class TranslateController {
     private final TranslateService translateService;
 
+    @Operation(summary = "Перевод текста из inputLanguage в outputLanguage")
     @PostMapping("/translate")
     public ResponseEntity<TranslateResultDto> translate(
             HttpServletRequest request,
